@@ -1,0 +1,20 @@
+# you should put your own ip addresses ...
+
+all:
+  hosts:
+    192.168.133.11:
+    192.168.188.22:
+    192.168.188.33:
+
+master:
+  hosts:
+    192.168.253.130:
+
+workers:
+  hosts:
+    192.168.253.129:
+    192.168.253.132:
+
+worker2:
+  hosts:
+    192.168.253.132

@@ -1,0 +1,92 @@
+# ---
+
+- hosts: all
+  become: yes
+  tasks:
+  - name: install Docker
+    apt:
+      name: docker.io
+      state: present
+      update_cache: true
+
+  - name: Disable swap
+    shell: |
+      sudo swapoff -a
+      sudo sed -i '/ swap / s/^/#/' /etc/fstab
+ 
+  - name: install APT Transport HTTPS
+    apt:
+      name: apt-transport-https
+      state: present
+
+  - name: make keyrings directory
+    ansible.builtin.file:
+      path: /etc/apt/keyrings
+      state: directory
+      owner: vagrant
+      group: vagrant
+      mode: '755'
+ 
+  - name: add Kubernetes apt-key
+    become: yes
+    shell: sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+  - name: config kuber gpp key
+    shell: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list &
+  
+  - name : chmod of some files
+    shell: sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg & sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
+
+  
+  - name: Install kubeadm, kubelet, and kubectl
+    apt:
+      update_cache: true
+      name: ['kubelet','kubeadm','kubectl']
+      classic: yes
+
+  - name : install some other dependency
+    apt:
+      name: ['containerd' , 'conntrack']
+  
+  - name: Download crictl file
+    get_url:
+      url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.30.1/crictl-v1.30.1-linux-amd64.tar.gz
+      dest: /home/vagrant
+      mode: '0755'
+  
+  - name: Unarchive a file that is already on the remote machine
+    ansible.builtin.unarchive:
+      src: ./crictl-v1.30.1-linux-amd64.tar.gz
+      dest: /usr/bin
+      remote_src: yes
+  - name: Extract crictl file
+    command: tar -xvzf crictl-v1.30.1-linux-amd64.tar.gz -C /usr/bin
+   
+
+- hosts: master
+  become: yes
+  tasks:
+    - name: Initialize Kubernetes cluster
+      shell: sudo kubeadm init --kubernetes-version=1.30.3 --cri-socket=unix:///var/run/containerd/containerd.sock --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
+      register: init_output
+      args:
+        executable: /bin/bash
+    - debug: msg="{{ hello.stdout }}"
+    
+    - name: Setup .kube folder
+      shell: mkdir -p /home/vagrant/.kube & sudo cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config & sudo chown $(id -u):$(id -g) /home/vagrant/.kube/config
+
+    - name: Deploy Calico network pod to the cluster
+      become: yes
+      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml --validate=false
+
+
+    # - name: Extract the kubeadm join command
+    #   shell: |
+    #     echo "{{ kubeadm_init.stdout_lines | select('search', 'kubeadm join') | list | join(' ') }}"
+    #   register: kubeadm_join_command
+
+
+    # - name: Display the kubeadm join command
+    #   debug:
+    #     msg: "Run the following command on your worker nodes to join them to the cluster: {{ kubeadm_join_command.stdout }}"
