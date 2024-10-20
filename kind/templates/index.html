@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% block body %}
+<br>
+<h1>GeoLocation Checking ...</h1>
+<hr>
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>IP Address</th>
+            <th>Title</th>
+            <th>Num Of Pages</th>
+            <th>Author(s)</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+</table>
+
+<br>
+<h1>Add New Member</h1>
+<form id="ipForm" method="POST" action="">
+    <div class="form-group">
+        <input type="text" id="ip" name="ip">
+    </div><br>
+    <p><button type="submit" class="btn btn-primary" value="Submit">Submit</button></p>
+</form>
+<script>
+    document.getElementById('ipForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const ipValue = document.getElementById('ip').value;
+        this.action = `/ip_check/${ipValue}`;
+        this.submit();
+    });
+</script>
+{% endblock %}
