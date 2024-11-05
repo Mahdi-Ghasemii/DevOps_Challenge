@@ -1,0 +1,7 @@
+
+- hosts: workers
+  become: yes
+  tasks:
+    - name: join your worker nodes to the master node (fill x.x.x.x with your master node ip address)
+      shell: sudo kubeadm join x.x.x.x:6443 --token b8x802.8q1hwbp2m6txcmbd \
+        --discovery-token-ca-cert-hash sha256:cd37c7c8cbca9bb8cc631031e725c4158ce2e54278e0767adc007e26e915661f --ignore-preflight-errors=all
