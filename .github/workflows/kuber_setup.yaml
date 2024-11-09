@@ -26,16 +26,9 @@ jobs:
         run: |
           docker-compose up -d
 
-      - name: Configure Ansible Inventory
-        run: |
-          echo "[nodes]" > inventory
-          echo "node1 ansible_host=node1" >> inventory
-          echo "node2 ansible_host=node2" >> inventory
-          echo "node3 ansible_host=node3" >> inventory
-
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i ansible/inventory.yml ansible/config_kuber.yml
+          ansible-playbook -i ansible/inventory_github_action.yml ansible/config_kuber.yml
 
       - name: Tear Down Docker Containers
         if: always()
