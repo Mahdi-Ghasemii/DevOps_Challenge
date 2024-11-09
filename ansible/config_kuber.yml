@@ -1,6 +1,6 @@
 # ---
 
-- hosts: all
+- hosts: workers
   become: yes
   tasks:
   - name: install Docker
@@ -29,10 +29,10 @@
  
   - name: add Kubernetes apt-key
     become: yes
-    shell: sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    shell: sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
   - name: config kuber gpp key
-    shell: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list &
+    shell: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
   
   - name : chmod of some files
     shell: sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg & sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
@@ -42,7 +42,7 @@
     apt:
       update_cache: true
       name: ['kubelet','kubeadm','kubectl']
-      classic: yes
+      # classic: yes
 
   - name : install some other dependency
     apt:
