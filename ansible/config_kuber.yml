@@ -1,6 +1,6 @@
 # ---
 
-- hosts: workers
+- hosts: all
   become: yes
   tasks:
   - name: install Docker
@@ -61,32 +61,3 @@
       remote_src: yes
   - name: Extract crictl file
     command: tar -xvzf crictl-v1.30.1-linux-amd64.tar.gz -C /usr/bin
-   
-
-- hosts: master
-  become: yes
-  tasks:
-    - name: Initialize Kubernetes cluster
-      shell: sudo kubeadm init --kubernetes-version=1.30.3 --cri-socket=unix:///var/run/containerd/containerd.sock --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
-      register: init_output
-      args:
-        executable: /bin/bash
-    - debug: msg="{{ hello.stdout }}"
-    
-    - name: Setup .kube folder
-      shell: mkdir -p /home/vagrant/.kube & sudo cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config & sudo chown $(id -u):$(id -g) /home/vagrant/.kube/config
-
-    - name: Deploy Calico network pod to the cluster
-      become: yes
-      shell: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml --validate=false
-
-
-    # - name: Extract the kubeadm join command
-    #   shell: |
-    #     echo "{{ kubeadm_init.stdout_lines | select('search', 'kubeadm join') | list | join(' ') }}"
-    #   register: kubeadm_join_command
-
-
-    # - name: Display the kubeadm join command
-    #   debug:
-    #     msg: "Run the following command on your worker nodes to join them to the cluster: {{ kubeadm_join_command.stdout }}"
