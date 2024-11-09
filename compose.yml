@@ -1,0 +1,15 @@
+# docker-compose.yml
+version: '3'
+services:
+  node1:
+    image: ubuntu:latest
+    container_name: node1
+    command: sleep infinity
+  node2:
+    image: ubuntu:latest
+    container_name: node2
+    command: sleep infinity
+  node3:
+    image: ubuntu:latest
+    container_name: node3
+    command: sleep infinity
