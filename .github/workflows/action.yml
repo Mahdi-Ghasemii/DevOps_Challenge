@@ -1,0 +1,63 @@
+name: Workflow
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  release:
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker build image
+        run: |
+          docker-compose build
+          docker compose up -d
+
+      - name: Tag Latest Docker Images
+        run: |
+          docker tag devops_challenge-front_end mahdi2359/devops_challenge-front_end
+          docker tag devops_challenge-back_end mahdi2359/devops_challenge-back_end:latest
+          docker tag devops_challenge-postgres mahdi2359/devops_challenge-postgres  :latest
+
+
+      # - name: Tag Images with Git SHA
+      #   run: |
+      #     docker tag mahdi2359/testproj_flask mahdi2359/testproj_flask:${{ github.sha }}
+      #     docker tag mahdi2359/testproj_nginx mahdi2359/testproj_nginx:${{ github.sha }}
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push mahdi2359/devops_challenge-front_end:latest
+          docker push mahdi2359/devops_challenge-back_end:latest
+          docker push mahdi2359/devops_challenge-postgres:latest
+          
+
+      - name: Push Image  to Docker Hub
+        run: |
+          docker push mahdi2359/devops_challenge-front_end:latest
+          docker push mahdi2359/devops_challenge-back_end:latest
+          docker push mahdi2359/devops_challenge-postgres:latest
+
+      - name: Log out from DockerHub
+        run: docker logout
