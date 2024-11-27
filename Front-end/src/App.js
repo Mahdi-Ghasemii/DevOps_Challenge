@@ -70,7 +70,7 @@ export default function App() {
       }
       try {
          setIsLoading(true);
-         const result = await fetch("http://localhost:4000/transactions", {
+         const result = await fetch("http://172,16.206.132:4000/transactions", {
             method: "POST",
             headers: {
                Accept: "application/json, text/plain, */*",
